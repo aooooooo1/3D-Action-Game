@@ -7,6 +7,12 @@ onBoardingDoNotAskAgain = true
 showPackageIndexes = false
 showStatusBar = false
 scopes = {
+	"last_search.DE949528" = ""
+	"OpenInspectorPreview.DE949528" = "0"
+	"currentGroup.DE949528" = "all"
+	"last_search.CE949528" = "? lang"
+	"OpenInspectorPreview.CE949528" = "0"
+	"currentGroup.CE949528" = "all"
 }
 providers = {
 	find = {
@@ -47,6 +53,31 @@ providers = {
 	log = {
 		active = false
 		priority = 210
+		defaultAction = null
+	}
+	menu = {
+		active = true
+		priority = 80
+		defaultAction = null
+	}
+	settings = {
+		active = true
+		priority = 100
+		defaultAction = null
+	}
+	help = {
+		active = true
+		priority = -1
+		defaultAction = null
+	}
+	calculator = {
+		active = true
+		priority = 10
+		defaultAction = null
+	}
+	static_methods = {
+		active = true
+		priority = 85
 		defaultAction = null
 	}
 }
