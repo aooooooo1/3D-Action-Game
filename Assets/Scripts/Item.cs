@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class Item : MonoBehaviour
 {
-    public enum type1 {Ammo, Coin , Grenade , Heart, Weapon};
-    public type1 enumType;
+    public enum type {Ammo, Coin , Grenade , Heart, Weapon};
+
+    public type enumType;
     public int value;
 
     private void Update()
