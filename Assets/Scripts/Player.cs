@@ -23,7 +23,7 @@ public class Player : MonoBehaviour
     bool threeKey;
     int equipObjIndex = -1;
     GameObject nearObj;
-    GameObject equipObj;
+    Weapon equipObj;
     Vector3 moveVec;
     Vector3 dodgeVec;
     Animator anim;
@@ -39,6 +39,10 @@ public class Player : MonoBehaviour
     public int maxCoin;
     public int maxHasGrenade;
 
+    //근접무기공격할때 쓰이는 정보
+    bool fireKey;
+    float fireDelay;
+    bool isFireReady;
 
 
     private void Awake()
@@ -56,6 +60,7 @@ public class Player : MonoBehaviour
         playerDodgeAction();
         interact();
         showWeapon();
+        Attack();
     }
 
     void getKey()
@@ -68,6 +73,7 @@ public class Player : MonoBehaviour
         oneKey = Input.GetButtonDown("One");
         twoKey = Input.GetButtonDown("Two");
         threeKey = Input.GetButtonDown("Three");
+        fireKey = Input.GetButtonDown("Fire1");
     }
     void playerMove()
     {
@@ -207,13 +213,13 @@ public class Player : MonoBehaviour
         if (oneKey || twoKey || threeKey) {
             //키를 눌렀을때 현제 무기가 있으면 없애준다.
             if (equipObj !=null) {
-                equipObj.SetActive(false);}
+                equipObj.gameObject.SetActive(false);}
             //equipObjIndex는 현제 키를 눌렀을때 인덱스번호이다.
             equipObjIndex = weaponIndex;
             //equipObj는 현제 키를 눌렀을때 보여지는 무기 인덱스번호이다.
-            equipObj = weapons[weaponIndex];
+            equipObj = weapons[weaponIndex].GetComponent<Weapon>();
             //2.가지고있는 무기 인덱스를 활성화
-            equipObj.SetActive(true);
+            equipObj.gameObject.SetActive(true);
             anim.SetTrigger("doSwap");
         }
     }
@@ -232,4 +238,23 @@ public class Player : MonoBehaviour
             nearObj = null;
         }    
     }
+
+    void Attack()
+    {
+        if(equipObj == null)
+        {
+            return;
+        }
+        fireDelay += Time.deltaTime;
+        isFireReady = fireDelay > equipObj.rate;
+        if(fireKey && isFireReady && !areYouDodge)
+        {
+            equipObj.use();
+            anim.SetTrigger("doSwing");
+            fireDelay = 0;
+        }
+    }
+
+
 }
+
