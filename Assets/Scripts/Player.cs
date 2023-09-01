@@ -73,7 +73,7 @@ public class Player : MonoBehaviour
         oneKey = Input.GetButtonDown("One");
         twoKey = Input.GetButtonDown("Two");
         threeKey = Input.GetButtonDown("Three");
-        fireKey = Input.GetButtonDown("Fire1");
+        fireKey = Input.GetButton("Fire1");
     }
     void playerMove()
     {
@@ -250,7 +250,7 @@ public class Player : MonoBehaviour
         if(fireKey && isFireReady && !areYouDodge)
         {
             equipObj.use();
-            anim.SetTrigger("doSwing");
+            anim.SetTrigger(equipObj.weaponType == Weapon.type.melee ? "doSwing" : "doShot");
             fireDelay = 0;
         }
     }
