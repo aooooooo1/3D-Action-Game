@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,6 +11,8 @@ public class Player : MonoBehaviour
 
     //수류탄 배열
     public GameObject[] grenades;
+    //수류탄 던질때 생기는 변수
+    public GameObject grenadObj;
 
     float h;
     float v;
@@ -21,6 +24,9 @@ public class Player : MonoBehaviour
     bool oneKey;
     bool twoKey;
     bool threeKey;
+    bool rKey;
+    bool isReload;
+    bool isBorder;
     int equipObjIndex = -1;
     GameObject nearObj;
     Weapon equipObj;
@@ -39,11 +45,14 @@ public class Player : MonoBehaviour
     public int maxCoin;
     public int maxHasGrenade;
 
-    //근접무기공격할때 쓰이는 정보
+    //무기공격할때 쓰이는 정보
     bool fireKey;
+    bool grenadeKey;
     float fireDelay;
     bool isFireReady;
 
+    //총쏠때 마우스방향으로 쏘기
+    public Camera followC;
 
     private void Awake()
     {
@@ -61,6 +70,8 @@ public class Player : MonoBehaviour
         interact();
         showWeapon();
         Attack();
+        Reload();
+        ThrowGrenade();
     }
 
     void getKey()
@@ -74,6 +85,8 @@ public class Player : MonoBehaviour
         twoKey = Input.GetButtonDown("Two");
         threeKey = Input.GetButtonDown("Three");
         fireKey = Input.GetButton("Fire1");
+        grenadeKey = Input.GetButtonDown("Fire2");
+        rKey = Input.GetButtonDown("Reload");
     }
     void playerMove()
     {
@@ -83,8 +96,9 @@ public class Player : MonoBehaviour
         {
             moveVec = dodgeVec; //이동할때 닷지하면 이동방향으로 닫지방향이 결정된다
         }
-        //player포지션에 moveVec 더해준다.
-        transform.position += speed * (walk ? 0.3f : 1f) * Time.deltaTime * moveVec;
+        if(!isBorder)//벽에 안 데일때만 이동 가능함 
+            //player포지션에 moveVec 더해준다.
+            transform.position += speed * (walk ? 0.3f : 1f) * Time.deltaTime * moveVec;
         //이동하면 isRun은 true
         anim.SetBool("isRun", moveVec != Vector3.zero);
         //walk발동하면 isWalk= true;
@@ -94,6 +108,25 @@ public class Player : MonoBehaviour
     void playerTurn()
     {
         transform.LookAt(transform.position + moveVec);
+
+        //마우스 클릭 방향 총알 쏘기
+        if (fireKey)
+        {
+            //메인카메라에서 Ray를 마우스클릭한곳으로 쏜다.
+            Ray ray = followC.ScreenPointToRay(Input.mousePosition);
+            //쏜 ray를 담을 객체
+            RaycastHit rayHit;
+            //raycast로 ray를 100만큼 쏘고 rayHot에 정보를 담는다
+            if (Physics.Raycast(ray, out rayHit, 100))
+            {
+                //마우스위치는 항상 바뀌기 때문에 여기서 플레이어위치를 뺀다
+                Vector3 nextVec = rayHit.point - transform.position;
+                //마우스 위치는 x,y좌표만 찍는다 
+                nextVec.y = 0;
+                //player direction + nextVec 
+                transform.LookAt(transform.position + nextVec);
+            }
+        }
     }
     //점프시 ayJump=true;
     void playerJumpAction()
@@ -254,7 +287,68 @@ public class Player : MonoBehaviour
             fireDelay = 0;
         }
     }
+    void Reload()
+    {
+        if (equipObj == null) return;//가진 무기가 없으면 리턴 
+        if (equipObj.weaponType == Weapon.type.melee) return;//가진무기가 근접이면 리턴 
+        if (ammo == 0) return;//가진총알이 0 이면 리턴 
 
+        if(rKey && !areYouDodge && !areYouJump)//r 키를 누르고 점프, 닫지가 아닐때 
+        {
+            anim.SetTrigger("doReload");//재장전모션추가 
+            isReload = true;//isReload bool 값 추가 
+            Invoke("reloadOut", 2f);//reladOut이 2초후에 시작 
+        }
+    }
+    void reloadOut()//재장전으로 총알이 추가되는 함수
+    {
+        int reAmmo = ammo + equipObj.curAmmo < equipObj.maxAmmo ? ammo : equipObj.maxAmmo-equipObj.curAmmo;
+        //총알 5개 그 무기의 현재 총알 10개 < 그 무기의 맥스총알 30 면 5개
+        //총알 100개 그무기현재총알 10개 < 그무기맥스총알 30개 면 20개 
+        equipObj.curAmmo += reAmmo;
+        ammo -= reAmmo;
+        isReload = false;
+    }
 
+    private void FixedUpdate()
+    {
+    //플레이어 충돌시 빙빙도는 현상을 막는 로직 
+        stopTrunPlayer();
+        DontGoWall();
+    }
+
+    //플레이어 도는 현상 막음
+    private void stopTrunPlayer()
+    {
+        rigid.angularVelocity = Vector3.zero;
+    }
+    //벽통과 현상 막음
+    private void DontGoWall()
+    {
+        Debug.DrawRay(transform.position, moveVec*3, Color.green);
+        isBorder = Physics.Raycast(transform.position, moveVec, 3, LayerMask.GetMask("Wall"));//Wall에 데이면 true가 됨
+        //true일때 playerMove에 제한사항 걸면 됨
+    }
+    void ThrowGrenade()
+    {
+        if (hasGrenade == 0) return;
+
+        if (grenadeKey)
+        {
+            Ray ray = followC.ScreenPointToRay(Input.mousePosition);
+            RaycastHit raycastHit;
+            if(Physics.Raycast(ray, out raycastHit, 100))
+            {
+                Vector3 grenadeVec = (raycastHit.point - transform.position).normalized;
+                grenadeVec.y = 1.5f;
+                GameObject grenadInst = Instantiate(grenadObj, transform.position, transform.rotation);
+                Rigidbody rigidGrenad = grenadInst.GetComponent<Rigidbody>();
+                rigidGrenad.AddForce(grenadeVec*10, ForceMode.Impulse);
+                rigidGrenad.AddTorque(Vector3.up * 10, ForceMode.Impulse);
+                hasGrenade--;
+                grenades[hasGrenade].SetActive(false);
+            }
+        }
+    }
 }
 

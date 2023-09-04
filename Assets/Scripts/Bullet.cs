@@ -13,9 +13,9 @@ public class Bullet : MonoBehaviour
         {
             Destroy(gameObject, 4);
         }
-        else if (collision.gameObject.tag == "Wall")
-        {
-            Destroy(gameObject);
-        }
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Wall") Destroy(gameObject);
     }
 }
