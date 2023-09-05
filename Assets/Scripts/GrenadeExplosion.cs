@@ -23,6 +23,7 @@ public class GrenadeExplosion : MonoBehaviour
             Debug.DrawLine(center + Vector3.right * radius, center - Vector3.right * radius, Color.yellow);
         }
     }
+
     IEnumerator Explosion()
     {
         yield return new WaitForSeconds(2.3f);
@@ -30,6 +31,7 @@ public class GrenadeExplosion : MonoBehaviour
         rigid.angularVelocity = Vector3.zero;
         mesh.SetActive(false);
         effect.SetActive(true);
+
         RaycastHit[] raycastHits = Physics.SphereCastAll(transform.position, 6, Vector3.up, 0f, LayerMask.GetMask("Enemy"));
         
         foreach(RaycastHit hitObj in raycastHits)

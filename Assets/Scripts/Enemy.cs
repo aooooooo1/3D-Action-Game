@@ -1,22 +1,39 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class Enemy : MonoBehaviour
 {//Enemy.cs 에서는 무기등에 의해 맞은 모션 (피격 )을 구현한다
     public int maxHealth;
     public int curHealth;
+    public Transform target;
     Rigidbody rigid;
     BoxCollider boxColl;
     //적이 총알에 맞을 경우에는 코루틴을 통해 잠깐 빨강색으로 보이게 할것이. 그렇기 때문에 material 을 가지고 온다
     Material mat;
-
+    NavMeshAgent nav;
+    Animator anim;
+    public bool isChase;
     private void Awake()
     {
         rigid = GetComponent<Rigidbody>();
         boxColl = GetComponent<BoxCollider>();
         //material은 매쉬 안에 있는 요소이므로 매쉬를 불러와서 매트를 불러야한.
-        mat = GetComponent<MeshRenderer>().material;
+        mat = GetComponentInChildren<MeshRenderer>().material;
+        nav = GetComponent<NavMeshAgent>();
+        anim = GetComponentInChildren<Animator>();
+        Invoke("ChaseStart", 1);
+    }
+    private void Update()
+    {
+        if(isChase)
+            nav.SetDestination(target.position);
+    }
+    void ChaseStart()
+    {
+        isChase = true;
+        anim.SetBool("isWalk", true);
     }
     private void OnTriggerEnter(Collider other)
     {
@@ -55,6 +72,9 @@ public class Enemy : MonoBehaviour
         {
             mat.color = Color.gray;
             gameObject.layer = 12;
+            isChase = false;
+            nav.enabled = false;
+            anim.SetTrigger("doDie");
 
             if (isExplosion)
             {
@@ -81,5 +101,17 @@ public class Enemy : MonoBehaviour
         curHealth -= 100;
         Vector3 reactVec = transform.position - explosionPos;
         StartCoroutine(OnDamage(reactVec, true));
+    }
+    private void FixedUpdate()
+    {
+        //플레이어 충돌시 빙빙도는 현상을 막는 로직 
+        stopTrunPlayer();
+    }
+
+    //플레이어 도는 현상 막음
+    private void stopTrunPlayer()
+    {
+        if(isChase)
+        rigid.velocity = Vector3.zero;
     }
 }
