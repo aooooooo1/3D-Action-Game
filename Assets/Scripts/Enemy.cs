@@ -25,15 +25,15 @@ public class Enemy : MonoBehaviour
         anim = GetComponentInChildren<Animator>();
         Invoke("ChaseStart", 1);
     }
-    private void Update()
-    {
-        if(isChase)
-            nav.SetDestination(target.position);
-    }
     void ChaseStart()
     {
         isChase = true;
         anim.SetBool("isWalk", true);
+    }
+    private void Update()
+    {
+        if(isChase)
+            nav.SetDestination(target.position);
     }
     private void OnTriggerEnter(Collider other)
     {
