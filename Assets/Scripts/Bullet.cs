@@ -18,4 +18,6 @@ public class Bullet : MonoBehaviour
     {
         if (other.tag == "Wall") Destroy(gameObject);
     }
+
+ 
 }

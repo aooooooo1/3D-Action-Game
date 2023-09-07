@@ -12,6 +12,8 @@ TagManager:
   - Wall
   - bullet
   - Enemy
+  - E.attackArea
+  - EnemyAttackArea
   layers:
   - Default
   - TransparentFX
@@ -26,7 +28,7 @@ TagManager:
   - Wall
   - Enemy
   - EnemyDead
-  - 
+  - E.attackArea
   - 
   - 
   - 

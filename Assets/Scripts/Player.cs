@@ -54,10 +54,16 @@ public class Player : MonoBehaviour
     //총쏠때 마우스방향으로 쏘기
     public Camera followC;
 
+    //플레이어 피격 무적bool
+    bool isDamaged;
+    //플레이어 피격시 색 변하도록 매쉬가져옴
+    MeshRenderer[] meshes;
+
     private void Awake()
     {
         rigid = GetComponent<Rigidbody>();
         anim = GetComponentInChildren<Animator>();
+        meshes = GetComponentsInChildren<MeshRenderer>();
     }
 
     void Update()
@@ -172,9 +178,9 @@ public class Player : MonoBehaviour
         }
     }
 
-    //item 먹기
+    
     void OnTriggerEnter(Collider other)
-    {
+    {   //item 먹기
         if (other.tag == "Item") {
             Item item = other.GetComponent<Item>();
             switch (item.enumType)
@@ -211,7 +217,37 @@ public class Player : MonoBehaviour
 
             }
             Destroy(other.gameObject);
-        }    
+        }
+        //몬스터한에 공격 당할때
+        else if(other.tag == "EnemyAttackArea")
+        {
+            if (!isDamaged)
+            {
+                EattackArea eattackArea = other.GetComponent<EattackArea>();
+                health -= eattackArea.damage;
+                StartCoroutine(OnDamaged());
+                if(other.GetComponent<Rigidbody>() != null)
+                {
+                    Destroy(other.gameObject);
+                }
+            }
+            
+        }
+    }
+    //몬스터 공격 당할때 코루틴 
+    IEnumerator OnDamaged()
+    {
+        isDamaged = true;
+        foreach(MeshRenderer mesh in meshes)
+        {
+            mesh.material.color = Color.green;
+        }
+        yield return new WaitForSeconds(0.5f);
+        foreach (MeshRenderer mesh in meshes)
+        {
+            mesh.material.color = Color.white;
+        }
+        isDamaged = false;
     }
 
     //2.무기획득 및 교체 

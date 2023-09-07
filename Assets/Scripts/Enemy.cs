@@ -15,6 +15,16 @@ public class Enemy : MonoBehaviour
     NavMeshAgent nav;
     Animator anim;
     public bool isChase;
+    //공격 범위 콜라이더
+    public BoxCollider meleeArea;
+    //공격 하는지?
+    public bool isAttack;
+    public enum type { A,B,C};
+    public type EnemyType;
+    //missile variable.
+    public GameObject Cmissile;
+
+
     private void Awake()
     {
         rigid = GetComponent<Rigidbody>();
@@ -32,8 +42,12 @@ public class Enemy : MonoBehaviour
     }
     private void Update()
     {
-        if(isChase)
+        if (nav.enabled)
+        {
             nav.SetDestination(target.position);
+            nav.isStopped = !isChase;
+        }
+
     }
     private void OnTriggerEnter(Collider other)
     {
@@ -68,7 +82,7 @@ public class Enemy : MonoBehaviour
         {
             mat.color = Color.white;
         }
-        else
+        else //죽는 경우
         {
             mat.color = Color.gray;
             gameObject.layer = 12;
@@ -89,7 +103,7 @@ public class Enemy : MonoBehaviour
             {
                 //s넉백 거리 상관없이 전부 1로 통일한다
                 reactVec = reactVec.normalized;
-                reactVec += Vector3.up * 3;
+                reactVec += Vector3.up;
                 rigid.AddForce(reactVec * 10, ForceMode.Impulse);
             }
             //enemy destroy
@@ -106,6 +120,8 @@ public class Enemy : MonoBehaviour
     {
         //플레이어 충돌시 빙빙도는 현상을 막는 로직 
         stopTrunPlayer();
+        //몬스터의 타겟팅을 구하는 로직
+        targeting();
     }
 
     //플레이어 도는 현상 막음
@@ -113,5 +129,78 @@ public class Enemy : MonoBehaviour
     {
         if(isChase)
         rigid.velocity = Vector3.zero;
+    }
+
+
+    //타겟팅 구함
+    void targeting()
+    {
+        float targetRadius = 0;
+        float targetRange = 0;
+
+        switch (EnemyType)
+        {
+            case type.A:
+                targetRadius = 1.5f;
+                targetRange = 5f;
+
+                break;
+            case type.B:
+                targetRadius = 1f;
+                targetRange = 16f;
+                break;
+            case type.C:
+                targetRadius = 1f;
+                targetRange = 25f;
+                break;
+        }
+                RaycastHit[] raycastHits = Physics.SphereCastAll(transform.position,
+                                                     targetRadius,
+                                                     transform.forward,
+                                                     targetRange,
+                                                     LayerMask.GetMask("Player"));
+                if (raycastHits.Length > 0 && !isAttack)
+                {
+                    StartCoroutine(EnemyAttack());
+                }
+    }
+    IEnumerator EnemyAttack()
+    {
+        isChase = false;
+        isAttack = true;
+        anim.SetBool("isAttack", true);
+
+        switch (EnemyType)
+        {
+            case type.A:
+                yield return new WaitForSeconds(0.2f);
+                meleeArea.enabled = true;
+                yield return new WaitForSeconds(1f);
+                meleeArea.enabled = false;
+                yield return new WaitForSeconds(1f);
+                break;
+            case type.B:
+                yield return new WaitForSeconds(0.1f);
+                meleeArea.enabled = true;
+                rigid.AddForce(transform.forward * 30, ForceMode.Impulse);
+                yield return new WaitForSeconds(1f);
+                rigid.velocity = Vector3.zero;
+                meleeArea.enabled = false;
+                yield return new WaitForSeconds(0.5f);
+                break;
+            case type.C:
+                yield return new WaitForSeconds(0.5f);
+                GameObject insMi = Instantiate(Cmissile, transform.position, transform.rotation);
+                Rigidbody rigidMi = insMi.GetComponent<Rigidbody>();
+                rigidMi.velocity = transform.forward * 30;
+                yield return new WaitForSeconds(1f);
+                break;
+        }
+
+        
+        isChase = true;
+        isAttack = false;
+        anim.SetBool("isAttack", false);
+
     }
 }
