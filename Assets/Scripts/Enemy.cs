@@ -127,7 +127,7 @@ public class Enemy : MonoBehaviour
     //플레이어 도는 현상 막음
     private void stopTrunPlayer()
     {
-        if(isChase)
+        if(nav.enabled)
         rigid.velocity = Vector3.zero;
     }
 
@@ -143,7 +143,6 @@ public class Enemy : MonoBehaviour
             case type.A:
                 targetRadius = 1.5f;
                 targetRange = 5f;
-
                 break;
             case type.B:
                 targetRadius = 1f;
@@ -154,38 +153,39 @@ public class Enemy : MonoBehaviour
                 targetRange = 25f;
                 break;
         }
-                RaycastHit[] raycastHits = Physics.SphereCastAll(transform.position,
-                                                     targetRadius,
-                                                     transform.forward,
-                                                     targetRange,
-                                                     LayerMask.GetMask("Player"));
-                if (raycastHits.Length > 0 && !isAttack)
-                {
-                    StartCoroutine(EnemyAttack());
-                }
+        RaycastHit[] raycastHits = Physics.SphereCastAll(transform.position,
+                                                targetRadius,
+                                                transform.forward,
+                                                targetRange,
+                                                LayerMask.GetMask("Player"));
+        if (raycastHits.Length > 0 && !isAttack)
+        {
+            StartCoroutine(EnemyAttack());
+        }
     }
     IEnumerator EnemyAttack()
     {
-        isChase = false;
-        isAttack = true;
-        anim.SetBool("isAttack", true);
+        isChase = false; //공격할때는 따라가는것을 멈춘다.
+        isAttack = true; //이걸 true와 false를 지정해야 타겟에서 조건을 걸수있다.
+        anim.SetBool("isAttack", true); //공격모션을 실행한다
 
         switch (EnemyType)
         {
             case type.A:
                 yield return new WaitForSeconds(0.2f);
-                meleeArea.enabled = true;
+                meleeArea.enabled = true; //0.2초 후에 공격범위 활성화 시킨다
                 yield return new WaitForSeconds(1f);
-                meleeArea.enabled = false;
+                meleeArea.enabled = false; //1초간 공격후 범위 비활성화
                 yield return new WaitForSeconds(1f);
-                break;
-            case type.B:
+                break; //1초 쉬고 다시 복귀
+            case type.B: 
                 yield return new WaitForSeconds(0.1f);
-                meleeArea.enabled = true;
-                rigid.AddForce(transform.forward * 30, ForceMode.Impulse);
-                yield return new WaitForSeconds(1f);
-                rigid.velocity = Vector3.zero;
-                meleeArea.enabled = false;
+                meleeArea.enabled = true; //0.1초 후에 공격범위 활성화
+                rigid.AddForce(transform.forward * 530, ForceMode.Impulse);
+                // 앞 방향으로 힘을 가한다
+                yield return new WaitForSeconds(1.5f);
+                rigid.velocity = Vector3.zero; //1초간 힘을가하고 다시 물리제로
+                meleeArea.enabled = false; //공격범위 비활성화
                 yield return new WaitForSeconds(0.5f);
                 break;
             case type.C:
@@ -196,11 +196,8 @@ public class Enemy : MonoBehaviour
                 yield return new WaitForSeconds(1f);
                 break;
         }
-
-        
-        isChase = true;
-        isAttack = false;
-        anim.SetBool("isAttack", false);
-
+        isChase = true; //다시 쫓아간다.
+        isAttack = false; //공격중이 아니다
+        anim.SetBool("isAttack", false); //모션 끝
     }
 }
