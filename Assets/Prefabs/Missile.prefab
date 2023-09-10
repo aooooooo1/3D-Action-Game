@@ -4890,6 +4890,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 20
+  isMi: 1
 --- !u!1 &6045732578436377904
 GameObject:
   m_ObjectHideFlags: 0

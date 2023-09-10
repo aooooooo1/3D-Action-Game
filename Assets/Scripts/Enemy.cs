@@ -8,32 +8,35 @@ public class Enemy : MonoBehaviour
     public int maxHealth;
     public int curHealth;
     public Transform target;
-    Rigidbody rigid;
-    BoxCollider boxColl;
+    public Rigidbody rigid;
+    public BoxCollider boxColl;
     //적이 총알에 맞을 경우에는 코루틴을 통해 잠깐 빨강색으로 보이게 할것이. 그렇기 때문에 material 을 가지고 온다
-    Material mat;
-    NavMeshAgent nav;
-    Animator anim;
+    //Material mat; 우리는 자식이 많은 물체의 색을 바꾸기 위해 배열버전 매쉬랜더러를 가지고 온다
+    public MeshRenderer[] meshes;
+    public NavMeshAgent nav;
+    public Animator anim;
     public bool isChase;
     //공격 범위 콜라이더
     public BoxCollider meleeArea;
     //공격 하는지?
     public bool isAttack;
-    public enum type { A,B,C};
+    public enum type { A,B,C,D};
     public type EnemyType;
     //missile variable.
     public GameObject Cmissile;
-
+    public bool isDead;
 
     private void Awake()
     {
         rigid = GetComponent<Rigidbody>();
         boxColl = GetComponent<BoxCollider>();
-        //material은 매쉬 안에 있는 요소이므로 매쉬를 불러와서 매트를 불러야한.
-        mat = GetComponentInChildren<MeshRenderer>().material;
+        meshes = GetComponentsInChildren<MeshRenderer>();
         nav = GetComponent<NavMeshAgent>();
         anim = GetComponentInChildren<Animator>();
-        Invoke("ChaseStart", 1);
+        if(EnemyType != type.D)
+        {
+            Invoke("ChaseStart", 1);
+        }
     }
     void ChaseStart()
     {
@@ -42,10 +45,15 @@ public class Enemy : MonoBehaviour
     }
     private void Update()
     {
-        if (nav.enabled)
+        if (nav.enabled && EnemyType != type.D)
         {
             nav.SetDestination(target.position);
             nav.isStopped = !isChase;
+        }
+        if (isDead)
+        {
+            StopAllCoroutines();
+            return;
         }
 
     }
@@ -75,17 +83,27 @@ public class Enemy : MonoBehaviour
     }
     IEnumerator OnDamage(Vector3 reactVec,bool isExplosion)
     {
-        mat.color = Color.red;
+        foreach(MeshRenderer mesh in meshes)
+        {
+            mesh.material.color = Color.red;
+        }
         yield return new WaitForSeconds(0.1f);
 
         if(curHealth > 0)
         {
-            mat.color = Color.white;
+            foreach (MeshRenderer mesh in meshes)
+            {
+                mesh.material.color = Color.white;
+            }
         }
         else //죽는 경우
         {
-            mat.color = Color.gray;
+            foreach (MeshRenderer mesh in meshes)
+            {
+                mesh.material.color = Color.gray;
+            }
             gameObject.layer = 12;
+            isDead = true;
             isChase = false;
             nav.enabled = false;
             anim.SetTrigger("doDie");
@@ -107,7 +125,10 @@ public class Enemy : MonoBehaviour
                 rigid.AddForce(reactVec * 10, ForceMode.Impulse);
             }
             //enemy destroy
-            Destroy(gameObject, 4);
+            if(EnemyType != type.D)
+            {
+                Destroy(gameObject, 4);
+            }
         }
     }
     public void HitByGrenade(Vector3 explosionPos)
@@ -135,32 +156,35 @@ public class Enemy : MonoBehaviour
     //타겟팅 구함
     void targeting()
     {
-        float targetRadius = 0;
-        float targetRange = 0;
+        if(EnemyType != type.D)
+        {
+            float targetRadius = 0;
+            float targetRange = 0;
 
-        switch (EnemyType)
-        {
-            case type.A:
-                targetRadius = 1.5f;
-                targetRange = 5f;
-                break;
-            case type.B:
-                targetRadius = 1f;
-                targetRange = 16f;
-                break;
-            case type.C:
-                targetRadius = 1f;
-                targetRange = 25f;
-                break;
-        }
-        RaycastHit[] raycastHits = Physics.SphereCastAll(transform.position,
-                                                targetRadius,
-                                                transform.forward,
-                                                targetRange,
-                                                LayerMask.GetMask("Player"));
-        if (raycastHits.Length > 0 && !isAttack)
-        {
-            StartCoroutine(EnemyAttack());
+            switch (EnemyType)
+            {
+                case type.A:
+                    targetRadius = 1.5f;
+                    targetRange = 5f;
+                    break;
+                case type.B:
+                    targetRadius = 1f;
+                    targetRange = 16f;
+                    break;
+                case type.C:
+                    targetRadius = 1f;
+                    targetRange = 25f;
+                    break;
+            }
+            RaycastHit[] raycastHits = Physics.SphereCastAll(transform.position,
+                                                    targetRadius,
+                                                    transform.forward,
+                                                    targetRange,
+                                                    LayerMask.GetMask("Player"));
+            if (raycastHits.Length > 0 && !isAttack)
+            {
+                StartCoroutine(EnemyAttack());
+            }
         }
     }
     IEnumerator EnemyAttack()

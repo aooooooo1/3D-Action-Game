@@ -65,7 +65,7 @@ public class Weapon : MonoBehaviour
         //생성한 객체에 물리효과를 추가한다
         Rigidbody rigidBullet = instantBullet.GetComponent<Rigidbody>();
         //물리효과를 받으면 velocity를 추가할수 있으니 forward 방향으로 추가한다 
-        rigidBullet.velocity = bulletPos.forward * 50;
+        rigidBullet.velocity = bulletPos.forward * 100;
 
         yield return null;//한턴쉬고 
         GameObject instantCase = Instantiate(bulletCase, bulletCasePos.position, bulletCasePos.rotation);

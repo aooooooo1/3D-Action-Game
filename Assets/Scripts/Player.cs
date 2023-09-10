@@ -225,22 +225,29 @@ public class Player : MonoBehaviour
             {
                 EattackArea eattackArea = other.GetComponent<EattackArea>();
                 health -= eattackArea.damage;
-                StartCoroutine(OnDamaged());
-                if(other.GetComponent<Rigidbody>() != null)
-                {
-                    Destroy(other.gameObject);
-                }
+                bool isBossAtk = other.name == "Jump Area";
+                StartCoroutine(OnDamaged(isBossAtk));
             }
-            
+            if(other.GetComponent<Rigidbody>() != null)
+            {
+                Destroy(other.gameObject);
+            }
         }
     }
     //몬스터 공격 당할때 코루틴 
-    IEnumerator OnDamaged()
+    IEnumerator OnDamaged(bool isBossAtk)
     {
+        
+
         isDamaged = true;
         foreach(MeshRenderer mesh in meshes)
         {
             mesh.material.color = Color.green;
+        }
+        if (isBossAtk)
+        {
+            Debug.Log("test");
+            rigid.AddForce(transform.forward * -25, ForceMode.Impulse);
         }
         yield return new WaitForSeconds(0.5f);
         foreach (MeshRenderer mesh in meshes)
@@ -248,6 +255,11 @@ public class Player : MonoBehaviour
             mesh.material.color = Color.white;
         }
         isDamaged = false;
+
+        if (isBossAtk)
+        {
+            rigid.velocity = Vector3.zero;
+        }
     }
 
     //2.무기획득 및 교체 

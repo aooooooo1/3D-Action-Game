@@ -1,20 +1,19 @@
 ﻿<Properties StartupConfiguration="{E2E99E55-4666-9349-2FC7-673BBA0519FB}|">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/BossRock.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Boss.cs">
     <Files>
-      <File FileName="Assets/Scripts/Player.cs" Line="356" Column="4" IsPinned="True" />
-      <File FileName="Assets/Scripts/Enemy.cs" />
-      <File FileName="Assets/Scripts/Bullet.cs" />
-      <File FileName="Assets/Scripts/Missile.cs" />
-      <File FileName="Assets/Scripts/EattackArea.cs" />
-      <File FileName="Assets/Scripts/BossMi.cs" />
-      <File FileName="Assets/Scripts/BossRock.cs" Line="33" Column="50" />
+      <File FileName="Assets/Scripts/Enemy.cs" Line="56" Column="20" />
+      <File FileName="Assets/Scripts/Boss.cs" Line="115" Column="35" />
+      <File FileName="Assets/Scripts/Player.cs" Line="249" Column="31" />
+      <File FileName="Assets/Scripts/EattackArea.cs" Line="11" Column="62" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="quad Action" expanded="True">
-            <Node name="Assets" expanded="True" selected="True">
-              <Node name="Scripts" expanded="True" />
+            <Node name="Assets" expanded="True">
+              <Node name="Scripts" expanded="True">
+                <Node name="Boss.cs" selected="True" />
+              </Node>
             </Node>
           </Node>
         </State>

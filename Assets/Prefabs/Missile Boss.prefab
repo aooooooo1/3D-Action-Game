@@ -4913,6 +4913,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 12
+  isMi: 1
   target: {fileID: 0}
 --- !u!1 &4699989740250153031
 GameObject:
