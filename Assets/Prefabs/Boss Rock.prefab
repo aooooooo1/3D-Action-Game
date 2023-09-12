@@ -174,5 +174,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 11
-  target: {fileID: 0}
+  isMi: 1
   torquePower: 10

@@ -23,7 +23,7 @@ public class Boss : Enemy
         nav = GetComponent<NavMeshAgent>();
         anim = GetComponentInChildren<Animator>();
 
-        nav.isStopped = true;//보스는 이동을 멈춤 
+        nav.isStopped = true;//보스는 이동을 멈춤 점프공격시 다시 풀거임
     }
 
     void Start()
@@ -84,12 +84,12 @@ public class Boss : Enemy
     //바위패턴
     IEnumerator rockPat()
     {
-        isLook = false;
-        anim.SetTrigger("doBigShot");
-        Instantiate(bossRock, transform.position+lookVec, transform.rotation);
-        yield return new WaitForSeconds(1.5f);
-        isLook = true;
-        isLook = false;
+        isLook = false;//바라보기 중단
+        anim.SetTrigger("doBigShot");//애니 실행
+        Instantiate(bossRock, transform.position+lookVec, transform.rotation);//바위 생성
+        yield return new WaitForSeconds(1.5f);//1.5초 후에
+        isLook = true;//다시 바라봄
+        isLook = false;// 바위 3개 던짐
         anim.SetTrigger("doBigShot");
         Instantiate(bossRock, transform.position + lookVec, transform.rotation);
         yield return new WaitForSeconds(1.5f);

@@ -221,10 +221,11 @@ public class Player : MonoBehaviour
         //몬스터한에 공격 당할때
         else if(other.tag == "EnemyAttackArea")
         {
-            if (!isDamaged)
+            if (!isDamaged) //무적이 아닌경우에만 데미지 입음. 즉 0.5초동안은 무적임
             {
                 EattackArea eattackArea = other.GetComponent<EattackArea>();
                 health -= eattackArea.damage;
+                //데미지를 입는데 점프 공격 옵젝이면 파라미터로 true보넨다.
                 bool isBossAtk = other.name == "Jump Area";
                 StartCoroutine(OnDamaged(isBossAtk));
             }
@@ -238,7 +239,7 @@ public class Player : MonoBehaviour
     IEnumerator OnDamaged(bool isBossAtk)
     {
         
-
+        //무적 시작
         isDamaged = true;
         foreach(MeshRenderer mesh in meshes)
         {
@@ -246,7 +247,6 @@ public class Player : MonoBehaviour
         }
         if (isBossAtk)
         {
-            Debug.Log("test");
             rigid.AddForce(transform.forward * -25, ForceMode.Impulse);
         }
         yield return new WaitForSeconds(0.5f);
@@ -254,6 +254,7 @@ public class Player : MonoBehaviour
         {
             mesh.material.color = Color.white;
         }
+        //무적 끝
         isDamaged = false;
 
         if (isBossAtk)

@@ -15,10 +15,6 @@ public class BossRock : EattackArea
         StartCoroutine(GainScale());//크기를 키운다
         StartCoroutine(StartRolling()); // 2초후 굴러간다
     }
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.tag == "Wall") Destroy(gameObject);
-    }
 
     IEnumerator GainScale() //크기 커지는 코루틴
     {
@@ -29,6 +25,7 @@ public class BossRock : EattackArea
             yield return null;
         }
     }
+
     private void Update()
     {
         SphereCollider sColl = GetComponent<SphereCollider>();
@@ -41,6 +38,7 @@ public class BossRock : EattackArea
             Debug.DrawLine(center + Vector3.right * radius, center - Vector3.right * radius, Color.yellow);
         }
     }
+
     IEnumerator StartRolling() //굴러가는 코루틴
     {
         yield return new WaitForSeconds(2f); // 2초 후에 굴러가도록 시작
