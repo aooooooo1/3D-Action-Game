@@ -105,17 +105,17 @@ public class Boss : Enemy
     IEnumerator taPat()
     {
         tauntVec = target.position + lookVec;
-        isLook = false;
+        isLook = false; //바라보기잠시중단
         nav.isStopped = false; //이때는 이동을 허락함
-        boxColl.enabled = false;
-        anim.SetTrigger("doTaunt");
+        boxColl.enabled = false; //보스콜라이더 비활성화
+        anim.SetTrigger("doTaunt"); //점프애니실행
         yield return new WaitForSeconds(1.3f);
-        meleeArea.enabled = true;
+        meleeArea.enabled = true; //1.3초후 점프공격범위 활성
         yield return new WaitForSeconds(1f);
-        meleeArea.enabled = false;
-        isLook = true;
-        nav.isStopped = true;
-        boxColl.enabled = true;
+        meleeArea.enabled = false; //1초후 점프공격범위 비활성
+        isLook = true; //다시 바라봄
+        nav.isStopped = true; //네브 중단
+        boxColl.enabled = true; //박스콜라이더 실행
         StartCoroutine(RanAtkPattern());
     }
 
