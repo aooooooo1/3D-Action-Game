@@ -27,6 +27,7 @@ public class Player : MonoBehaviour
     bool rKey;
     bool isReload;
     bool isBorder;
+    bool isShop;
     int equipObjIndex = -1;
     GameObject nearObj;
     Weapon equipObj;
@@ -267,15 +268,26 @@ public class Player : MonoBehaviour
     void interact() {
         //조건:nearObj의 정보가 있고 e키를 눌렀을때
         if (nearObj != null && eKey) {
-            //Item Class의 value를 쓰기위해 nearObj에 초기화(지금 얘네들은 weapon이라 value값이 있음)
-            Item item = nearObj.GetComponent<Item>();
-            //아이템벨류값을 int로 저장(배열에 쓰기 위해)
-            int weaponValue = item.value;
-            //획득한 무기를 배열 bool값으로 저장
-            hasWeapon[weaponValue] = true;
-            //획득후 무기 삭제
-            Destroy(nearObj);
+            if(nearObj.tag == "Weapon")
+            {
+                //Item Class의 value를 쓰기위해 nearObj에 초기화(지금 얘네들은 weapon이라 value값이 있음)
+                Item item = nearObj.GetComponent<Item>();
+                //아이템벨류값을 int로 저장(배열에 쓰기 위해)
+                int weaponValue = item.value;
+                //획득한 무기를 배열 bool값으로 저장
+                hasWeapon[weaponValue] = true;
+                //획득후 무기 삭제
+                Destroy(nearObj);
+            }
+            else if (nearObj.tag == "shop")
+            {
+                Shop shop = nearObj.GetComponent<Shop>();
+                shop.enter(this);
+                isShop = true;
+            }
+
         }
+       
     }
     //3.무기 착용
     void showWeapon() {
@@ -308,17 +320,24 @@ public class Player : MonoBehaviour
     //1.무기와 닿아 있을때(중요) 정보 nearObj에 담음
      void OnTriggerStay(Collider other)
     {
-        if(other.tag == "Weapon")
+        if(other.tag == "Weapon" || other.tag=="shop")
         {
             nearObj = other.gameObject;
         }    
     }
+
      void OnTriggerExit(Collider other)
     {
         if(other.tag == "Weapon")
         {
             nearObj = null;
-        }    
+        }else if (other.tag == "shop")
+        {
+            Shop shop = other.GetComponent<Shop>();
+            shop.exit();
+            isShop = false;
+            nearObj = null;
+        }
     }
 
     void Attack()
@@ -329,7 +348,7 @@ public class Player : MonoBehaviour
         }
         fireDelay += Time.deltaTime;
         isFireReady = fireDelay > equipObj.rate;
-        if(fireKey && isFireReady && !areYouDodge)
+        if(fireKey && isFireReady && !areYouDodge && !isShop)
         {
             equipObj.use();
             anim.SetTrigger(equipObj.weaponType == Weapon.type.melee ? "doSwing" : "doShot");

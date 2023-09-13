@@ -45,17 +45,19 @@ public class Enemy : MonoBehaviour
     }
     private void Update()
     {
+        //nav가 활성화되고 EnemyType이고 보스가 아닐때
         if (nav.enabled && EnemyType != type.D)
-        {
+        {   //유도 시작
             nav.SetDestination(target.position);
+            //유도가 멈추는것은 따라가기가 아닌겁니다
             nav.isStopped = !isChase;
         }
+        //죽은경우
         if (isDead)
         {
             StopAllCoroutines();
             return;
         }
-
     }
     private void OnTriggerEnter(Collider other)
     {
