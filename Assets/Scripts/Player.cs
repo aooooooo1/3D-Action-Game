@@ -67,6 +67,7 @@ public class Player : MonoBehaviour
     //음악
     public AudioSource jump;
     public AudioSource d;
+    public AudioSource b;
 
 
 
