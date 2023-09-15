@@ -22,6 +22,9 @@ public class Weapon : MonoBehaviour
 
     public int maxAmmo; //최대탄창갯수
     public int curAmmo; //현재탄창개수
+
+    public AudioSource bulletA;
+
     void Start()
     {
         
@@ -66,7 +69,7 @@ public class Weapon : MonoBehaviour
         Rigidbody rigidBullet = instantBullet.GetComponent<Rigidbody>();
         //물리효과를 받으면 velocity를 추가할수 있으니 forward 방향으로 추가한다 
         rigidBullet.velocity = bulletPos.forward * 100;
-
+        bulletA.Play();
         yield return null;//한턴쉬고 
         GameObject instantCase = Instantiate(bulletCase, bulletCasePos.position, bulletCasePos.rotation);
         Rigidbody rigidCase = instantBullet.GetComponent<Rigidbody>();

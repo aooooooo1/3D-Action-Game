@@ -7,6 +7,7 @@ public class Enemy : MonoBehaviour
 {//Enemy.cs 에서는 무기등에 의해 맞은 모션 (피격 )을 구현한다
     public int maxHealth;
     public int curHealth;
+    public GameManager manager;
     public Transform target;
     public Rigidbody rigid;
     public BoxCollider boxColl;
@@ -25,6 +26,10 @@ public class Enemy : MonoBehaviour
     //missile variable.
     public GameObject Cmissile;
     public bool isDead;
+
+    //몬스터가 죽으면 플레이어에게 점수를 줘야한다 
+    public int score;
+    public GameObject[] coins; //애너미가 죽으면 동전을 떨군다
 
     private void Awake()
     {
@@ -109,6 +114,27 @@ public class Enemy : MonoBehaviour
             isChase = false;
             nav.enabled = false;
             anim.SetTrigger("doDie");
+            //몬스터가 죽으면 플레이어 점수는 올라감
+            Player p = target.GetComponent<Player>();
+            p.score += score;
+            int ranCoin = Random.Range(0, 3);
+            Instantiate(coins[ranCoin], transform.position, Quaternion.identity);
+            //죽었을때 카운트가 깎임
+            switch (EnemyType)
+            {
+                case type.A:
+                    manager.enemyCntA--;
+                    break;
+                case type.B:
+                    manager.enemyCntB--;
+                    break;
+                case type.C:
+                    manager.enemyCntC--;
+                    break;
+                case type.D:
+                    manager.enemyCntD--;
+                    break;
+            }
 
             if (isExplosion)
             {
@@ -126,11 +152,7 @@ public class Enemy : MonoBehaviour
                 reactVec += Vector3.up;
                 rigid.AddForce(reactVec * 10, ForceMode.Impulse);
             }
-            //enemy destroy
-            if(EnemyType != type.D)
-            {
                 Destroy(gameObject, 4);
-            }
         }
     }
     public void HitByGrenade(Vector3 explosionPos)

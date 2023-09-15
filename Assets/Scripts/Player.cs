@@ -28,9 +28,10 @@ public class Player : MonoBehaviour
     bool isReload;
     bool isBorder;
     bool isShop;
+    bool isDead;
     int equipObjIndex = -1;
     GameObject nearObj;
-    Weapon equipObj;
+    public Weapon equipObj;
     Vector3 moveVec;
     Vector3 dodgeVec;
     Animator anim;
@@ -59,12 +60,25 @@ public class Player : MonoBehaviour
     bool isDamaged;
     //플레이어 피격시 색 변하도록 매쉬가져옴
     MeshRenderer[] meshes;
+    public GameManager manager;
+    //스코어 업덷하기위해 변수 만들었.
+    public int score;
+
+    //음악
+    public AudioSource jump;
+    public AudioSource d;
+
+
+
 
     private void Awake()
     {
         rigid = GetComponent<Rigidbody>();
         anim = GetComponentInChildren<Animator>();
         meshes = GetComponentsInChildren<MeshRenderer>();
+
+        Debug.Log(PlayerPrefs.GetInt("maxScore"));
+        //PlayerPrefs.SetInt("maxScore", 12345);
     }
 
     void Update()
@@ -110,6 +124,10 @@ public class Player : MonoBehaviour
         anim.SetBool("isRun", moveVec != Vector3.zero);
         //walk발동하면 isWalk= true;
         anim.SetBool("isWalk", walk);
+        if (isDead)
+        {
+            moveVec = Vector3.zero;
+        }
     }
     //player가 가고있는 방향으로 정면을 만들어준다.
     void playerTurn()
@@ -117,7 +135,7 @@ public class Player : MonoBehaviour
         transform.LookAt(transform.position + moveVec);
 
         //마우스 클릭 방향 총알 쏘기
-        if (fireKey)
+        if (fireKey && !isDead)
         {
             //메인카메라에서 Ray를 마우스클릭한곳으로 쏜다.
             Ray ray = followC.ScreenPointToRay(Input.mousePosition);
@@ -138,12 +156,14 @@ public class Player : MonoBehaviour
     //점프시 ayJump=true;
     void playerJumpAction()
     {
-        if (playerJump && areYouJump==false && moveVec ==Vector3.zero )
+        if (playerJump && areYouJump==false && moveVec ==Vector3.zero && !isDead)
         {
             rigid.AddForce(Vector3.up*15, ForceMode.Impulse);
             anim.SetBool("areYouJump", true);
             anim.SetTrigger("doJump");
             areYouJump = true;
+
+            jump.Play();
         }
         
     }
@@ -151,7 +171,7 @@ public class Player : MonoBehaviour
     void playerDodgeAction()
     {
         //조건: 움직이고 점프키를 누르고 점프,닫지상태가 아닐때
-        if (moveVec != Vector3.zero && areYouJump == false && playerJump && !areYouDodge)
+        if (moveVec != Vector3.zero && areYouJump == false && playerJump && !areYouDodge && !isDead)
         {
             dodgeVec = moveVec; //닷지 일때 방향을 기억한다 
             speed *= 2;
@@ -159,6 +179,8 @@ public class Player : MonoBehaviour
             areYouDodge = true;
 
             Invoke("dodgeOut",0.5f);
+
+            d.Play();
         }
 
     }
@@ -250,6 +272,11 @@ public class Player : MonoBehaviour
         {
             rigid.AddForce(transform.forward * -25, ForceMode.Impulse);
         }
+        //플레이어가 죽을때
+        if (health <= 0 && !isDead)//OnDie를 계속 호출해서 애니가 계속 작동한다 그래서 !isDead를 넣어서 한번만실행하게 함
+        {
+            OnDie();
+        }
         yield return new WaitForSeconds(0.5f);
         foreach (MeshRenderer mesh in meshes)
         {
@@ -262,6 +289,14 @@ public class Player : MonoBehaviour
         {
             rigid.velocity = Vector3.zero;
         }
+
+       
+    }
+    void OnDie()
+    {
+        anim.SetTrigger("doDie");
+        isDead = true;
+        manager.GameOver();
     }
 
     //2.무기획득 및 교체 
@@ -361,7 +396,7 @@ public class Player : MonoBehaviour
         if (equipObj.weaponType == Weapon.type.melee) return;//가진무기가 근접이면 리턴 
         if (ammo == 0) return;//가진총알이 0 이면 리턴 
 
-        if(rKey && !areYouDodge && !areYouJump)//r 키를 누르고 점프, 닫지가 아닐때 
+        if(rKey && !areYouDodge && !areYouJump && !isDead)//r 키를 누르고 점프, 닫지가 아닐때 
         {
             anim.SetTrigger("doReload");//재장전모션추가 
             isReload = true;//isReload bool 값 추가 
@@ -401,7 +436,7 @@ public class Player : MonoBehaviour
     {
         if (hasGrenade == 0) return;
 
-        if (grenadeKey)
+        if (grenadeKey && !isDead )
         {
             Ray ray = followC.ScreenPointToRay(Input.mousePosition);
             RaycastHit raycastHit;
